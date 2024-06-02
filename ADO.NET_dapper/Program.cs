@@ -38,6 +38,9 @@ namespace ADO.NET_dapper
                 Console.WriteLine("4. Display the list of promotional products");
                 Console.WriteLine("5. Display all cities");
                 Console.WriteLine("6. Display all countries");
+                Console.WriteLine("7. Display all buyers from a particular city");
+                Console.WriteLine("8. Display all buyers from a specific country");
+                Console.WriteLine("9. Display all shares for a particular country");
                 Console.WriteLine("0. Exit");
                 Console.Write("Select an option: ");
 
@@ -62,6 +65,15 @@ namespace ADO.NET_dapper
                         break;
                     case "6":
                         DisplayAllCountries(db);
+                        break;
+                    case "7":
+                        DisplayBuyersByCity(db);
+                        break;
+                    case "8":
+                        DisplayBuyersByCountry(db);
+                        break;
+                    case "9":
+                        DisplaySharesByCountry(db);
                         break;
                     case "0":
                         return;
@@ -129,6 +141,42 @@ namespace ADO.NET_dapper
             foreach (var country in countries)
             {
                 Console.WriteLine(country);
+            }
+        }
+
+        private static void DisplayBuyersByCity(IDbConnection db)
+        {
+            Console.Write("Enter city name: ");
+            var city = Console.ReadLine();
+            var buyers = db.Query<Buyer>("SELECT * FROM Buyers WHERE City = @City", new { City = city }).ToList();
+            Console.WriteLine($"\nBuyers from {city}:");
+            foreach (var buyer in buyers)
+            {
+                Console.WriteLine($"{buyer.BuyerId}: {buyer.Name} - {buyer.Email}");
+            }
+        }
+
+        private static void DisplayBuyersByCountry(IDbConnection db)
+        {
+            Console.Write("Enter country name: ");
+            var country = Console.ReadLine();
+            var buyers = db.Query<Buyer>("SELECT * FROM Buyers WHERE Country = @Country", new { Country = country }).ToList();
+            Console.WriteLine($"\nBuyers from {country}:");
+            foreach (var buyer in buyers)
+            {
+                Console.WriteLine($"{buyer.BuyerId}: {buyer.Name} - {buyer.Email}");
+            }
+        }
+
+        private static void DisplaySharesByCountry(IDbConnection db)
+        {
+            Console.Write("Enter country name: ");
+            var country = Console.ReadLine();
+            var promotions = db.Query<Promotion>("SELECT * FROM Promotions WHERE Country = @Country", new { Country = country }).ToList();
+            Console.WriteLine($"\nShares for {country}:");
+            foreach (var promo in promotions)
+            {
+                Console.WriteLine($"{promo.PromotionId}: {promo.ProductName} - ({promo.StartDate} to {promo.EndDate})");
             }
         }
 
