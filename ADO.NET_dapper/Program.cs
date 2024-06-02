@@ -1,16 +1,19 @@
 ﻿using Dapper;
 using MySql.Data.MySqlClient;
+using System;
 using System.Data;
+using System.Diagnostics.Metrics;
+using System.Linq;
 
-namespace ADO.NET_dapper
+namespace MailingListApp
 {
     public class Program
     {
-        private static string connectionString = "Server=localhost;Database=mailinglistdb;User ID=root;Password=yourpassword;"; 
+        private static string connectionString = "Server=localhost;Database=mailinglistdb;Uid=root;Pwd=yourpassword;";
 
         static void Main(string[] args)
         {
-            using (IDbConnection db = new MySqlConnection(connectionString)) 
+            using (IDbConnection db = new MySqlConnection(connectionString))
             {
                 try
                 {
@@ -56,6 +59,9 @@ namespace ADO.NET_dapper
                 Console.WriteLine("22. Delete city information");
                 Console.WriteLine("23. Delete section information");
                 Console.WriteLine("24. Delete promotional product information");
+                Console.WriteLine("25. Display a list of cities in a particular country");
+                Console.WriteLine("26. Display a list of sections of a particular customer");
+                Console.WriteLine("27. Display the list of promotional products of a certain section");
                 Console.WriteLine("0. Exit");
                 Console.Write("Select an option: ");
 
@@ -134,6 +140,15 @@ namespace ADO.NET_dapper
                         break;
                     case "24":
                         DeletePromotionalProductInformation(db);
+                        break;
+                    case "25":
+                        DisplayCitiesInCountry(db);
+                        break;
+                    case "26":
+                        DisplaySectionsOfCustomer(db);
+                        break;
+                    case "27":
+                        DisplayPromotionalProductsInSection(db);
                         break;
                     case "0":
                         return;
@@ -220,7 +235,10 @@ namespace ADO.NET_dapper
         {
             Console.Write("Enter country name: ");
             var country = Console.ReadLine();
-            var buyers = db.Query<Buyer>("SELECT * FROM Buyers WHERE Country = @Country", new { Country = country }).ToList();
+            var buyers = db.Query<Buyer>("SELECT * FROM Buyers WHERE Country = @Country", new
+            {
+                Country = country
+            }).ToList();
             Console.WriteLine($"\nBuyers from {country}:");
             foreach (var buyer in buyers)
             {
@@ -236,26 +254,26 @@ namespace ADO.NET_dapper
             Console.WriteLine($"\nShares for {country}:");
             foreach (var promo in promotions)
             {
-                Console.WriteLine($"{promo.PromotionId}: {promo.ProductName} - ({promo.StartDate} to {promo.EndDate})");
+                Console.WriteLine($"{promo.PromotionId}: {promo.ProductName} ({promo.StartDate} to {promo.EndDate})");
             }
         }
 
         private static void InsertNewBuyer(IDbConnection db)
         {
             Console.Write("Enter name: ");
-            string name = Console.ReadLine();
+            var name = Console.ReadLine();
             Console.Write("Enter date of birth (YYYY-MM-DD): ");
-            DateTime dob = DateTime.Parse(Console.ReadLine());
+            var dob = DateTime.Parse(Console.ReadLine());
             Console.Write("Enter gender: ");
-            string gender = Console.ReadLine();
+            var gender = Console.ReadLine();
             Console.Write("Enter email: ");
-            string email = Console.ReadLine();
+            var email = Console.ReadLine();
             Console.Write("Enter country: ");
-            string country = Console.ReadLine();
+            var country = Console.ReadLine();
             Console.Write("Enter city: ");
-            string city = Console.ReadLine();
+            var city = Console.ReadLine();
 
-            string sql = "INSERT INTO Buyers (Name, Dob, Gender, Email, Country, City) VALUES (@Name, @Dob, @Gender, @Email, @Country, @City)";
+            var sql = "INSERT INTO Buyers (Name, Dob, Gender, Email, Country, City) VALUES (@Name, @Dob, @Gender, @Email, @Country, @City)";
             db.Execute(sql, new { Name = name, Dob = dob, Gender = gender, Email = email, Country = country, City = city });
             Console.WriteLine("Buyer inserted successfully.");
         }
@@ -263,10 +281,9 @@ namespace ADO.NET_dapper
         private static void InsertNewCountry(IDbConnection db)
         {
             Console.Write("Enter country name: ");
-            string country = Console.ReadLine();
+            var country = Console.ReadLine();
 
-            // Assuming you have a Countries table
-            string sql = "INSERT INTO Countries (Name) VALUES (@Country)";
+            var sql = "INSERT INTO Countries (Name) VALUES (@Country)";
             db.Execute(sql, new { Country = country });
             Console.WriteLine("Country inserted successfully.");
         }
@@ -274,10 +291,9 @@ namespace ADO.NET_dapper
         private static void InsertNewCity(IDbConnection db)
         {
             Console.Write("Enter city name: ");
-            string city = Console.ReadLine();
+            var city = Console.ReadLine();
 
-            // Assuming you have a Cities table
-            string sql = "INSERT INTO Cities (Name) VALUES (@City)";
+            var sql = "INSERT INTO Cities (Name) VALUES (@City)";
             db.Execute(sql, new { City = city });
             Console.WriteLine("City inserted successfully.");
         }
@@ -285,9 +301,9 @@ namespace ADO.NET_dapper
         private static void InsertNewSection(IDbConnection db)
         {
             Console.Write("Enter section name: ");
-            string sectionName = Console.ReadLine();
+            var sectionName = Console.ReadLine();
 
-            string sql = "INSERT INTO Interests (SectionName) VALUES (@SectionName)";
+            var sql = "INSERT INTO Interests (SectionName) VALUES (@SectionName)";
             db.Execute(sql, new { SectionName = sectionName });
             Console.WriteLine("Section inserted successfully.");
         }
@@ -295,151 +311,183 @@ namespace ADO.NET_dapper
         private static void InsertNewPromotionalProduct(IDbConnection db)
         {
             Console.Write("Enter section id: ");
-            int sectionId = int.Parse(Console.ReadLine());
+            var sectionId = int.Parse(Console.ReadLine());
             Console.Write("Enter product name: ");
-            string productName = Console.ReadLine();
+            var productName = Console.ReadLine();
             Console.Write("Enter country: ");
-            string country = Console.ReadLine();
+            var country = Console.ReadLine();
             Console.Write("Enter start date (YYYY-MM-DD): ");
-            DateTime startDate = DateTime.Parse(Console.ReadLine());
+            var startDate = DateTime.Parse(Console.ReadLine());
             Console.Write("Enter end date (YYYY-MM-DD): ");
-            DateTime endDate = DateTime.Parse(Console.ReadLine());
+            var endDate = DateTime.Parse(Console.ReadLine());
 
-            string sql = "INSERT INTO Promotions (SectionId, ProductName, Country, StartDate, EndDate) VALUES (@SectionId, @ProductName, @Country, @StartDate, @EndDate)";
+            var sql = "INSERT INTO Promotions (SectionId, ProductName, Country, StartDate, EndDate) VALUES (@SectionId, @ProductName, @Country, @StartDate, @EndDate)";
             db.Execute(sql, new { SectionId = sectionId, ProductName = productName, Country = country, StartDate = startDate, EndDate = endDate });
             Console.WriteLine("Promotional product inserted successfully.");
         }
 
         private static void UpdateCustomerInformation(IDbConnection db)
         {
-            Console.Write("Enter buyer id: ");
-            int buyerId = int.Parse(Console.ReadLine());
-            Console.Write("Enter new name (leave empty to keep current): ");
-            string name = Console.ReadLine();
-            Console.Write("Enter new date of birth (YYYY-MM-DD, leave empty to keep current): ");
-            string dobInput = Console.ReadLine();
-            DateTime? dob = string.IsNullOrEmpty(dobInput) ? (DateTime?)null : DateTime.Parse(dobInput);
-            Console.Write("Enter new gender (leave empty to keep current): ");
-            string gender = Console.ReadLine();
-            Console.Write("Enter new email (leave empty to keep current): ");
-            string email = Console.ReadLine();
-            Console.Write("Enter new country (leave empty to keep current): ");
-            string country = Console.ReadLine();
-            Console.Write("Enter new city (leave empty to keep current): ");
-            string city = Console.ReadLine();
+            Console.Write("Enter buyer ID: ");
+            var buyerId = int.Parse(Console.ReadLine());
+            Console.Write("Enter new name: ");
+            var newName = Console.ReadLine();
+            Console.Write("Enter new date of birth (YYYY-MM-DD): ");
+            var newDob = DateTime.Parse(Console.ReadLine());
+            Console.Write("Enter new gender: ");
+            var newGender = Console.ReadLine();
+            Console.Write("Enter new email: ");
+            var newEmail = Console.ReadLine();
+            Console.Write("Enter new country: ");
+            var newCountry = Console.ReadLine();
+            Console.Write("Enter new city: ");
+            var newCity = Console.ReadLine();
 
-            string sql = "UPDATE Buyers SET Name = COALESCE(NULLIF(@Name, ''), Name), Dob = COALESCE(@Dob, Dob), Gender = COALESCE(NULLIF(@Gender, ''), Gender), Email = COALESCE(NULLIF(@Email, ''), Email), Country = COALESCE(NULLIF(@Country, ''), Country), City = COALESCE(NULLIF(@City, ''), City) WHERE BuyerId = @BuyerId";
-            db.Execute(sql, new { BuyerId = buyerId, Name = name, Dob = dob, Gender = gender, Email = email, Country = country, City = city });
-            Console.WriteLine("Customer information updated successfully.");
+            var sql = "UPDATE Buyers SET Name = @Name, Dob = @Dob, Gender = @Gender, Email = @Email, Country = @Country, City = @City WHERE BuyerId = @BuyerId";
+            db.Execute(sql, new { Name = newName, Dob = newDob, Gender = newGender, Email = newEmail, Country = newCountry, City = newCity, BuyerId = buyerId });
+            Console.WriteLine("Buyer information updated successfully.");
         }
 
         private static void UpdateCountryInformation(IDbConnection db)
         {
-            Console.Write("Enter country id: ");
-            int countryId = int.Parse(Console.ReadLine());
-            Console.Write("Enter new country name (leave empty to keep current): ");
-            string country = Console.ReadLine();
+            Console.Write("Enter existing country name: ");
+            var oldCountry = Console.ReadLine();
+            Console.Write("Enter new country name: ");
+            var newCountry = Console.ReadLine();
 
-            string sql = "UPDATE Countries SET Name = COALESCE(NULLIF(@Country, ''), Name) WHERE CountryId = @CountryId";
-            db.Execute(sql, new { CountryId = countryId, Country = country });
+            var sql = "UPDATE Buyers SET Country = @NewCountry WHERE Country = @OldCountry";
+            db.Execute(sql, new { OldCountry = oldCountry, NewCountry = newCountry });
             Console.WriteLine("Country information updated successfully.");
         }
 
         private static void UpdateCityInformation(IDbConnection db)
         {
-            Console.Write("Enter city id: ");
-            int cityId = int.Parse(Console.ReadLine());
-            Console.Write("Enter new city name (leave empty to keep current): ");
-            string city = Console.ReadLine();
+            Console.Write("Enter existing city name: ");
+            var oldCity = Console.ReadLine();
+            Console.Write("Enter new city name: ");
+            var newCity = Console.ReadLine();
 
-            string sql = "UPDATE Cities SET Name = COALESCE(NULLIF(@City, ''), Name) WHERE CityId = @CityId";
-            db.Execute(sql, new { CityId = cityId, City = city });
+            var sql = "UPDATE Buyers SET City = @NewCity WHERE City = @OldCity";
+            db.Execute(sql, new { OldCity = oldCity, NewCity = newCity });
             Console.WriteLine("City information updated successfully.");
         }
 
         private static void UpdateSectionInformation(IDbConnection db)
         {
-            Console.Write("Enter section id: ");
-            int sectionId = int.Parse(Console.ReadLine());
-            Console.Write("Enter new section name (leave empty to keep current): ");
-            string sectionName = Console.ReadLine();
+            Console.Write("Enter existing section name: ");
+            var oldSection = Console.ReadLine();
+            Console.Write("Enter new section name: ");
+            var newSection = Console.ReadLine();
 
-            string sql = "UPDATE Interests SET SectionName = COALESCE(NULLIF(@SectionName, ''), SectionName) WHERE InterestId = @SectionId";
-            db.Execute(sql, new { SectionId = sectionId, SectionName = sectionName });
+            var sql = "UPDATE Interests SET SectionName = @NewSection WHERE SectionName = @OldSection";
+            db.Execute(sql, new { OldSection = oldSection, NewSection = newSection });
             Console.WriteLine("Section information updated successfully.");
         }
 
         private static void UpdatePromotionalProductInformation(IDbConnection db)
         {
-            Console.Write("Enter promotion id: ");
-            int promotionId = int.Parse(Console.ReadLine());
-            Console.Write("Enter new section id (leave empty to keep current): ");
-            string sectionIdInput = Console.ReadLine();
-            int? sectionId = string.IsNullOrEmpty(sectionIdInput) ? (int?)null : int.Parse(sectionIdInput);
-            Console.Write("Enter new product name (leave empty to keep current): ");
-            string productName = Console.ReadLine();
-            Console.Write("Enter new country (leave empty to keep current): ");
-            string country = Console.ReadLine();
-            Console.Write("Enter new start date (YYYY-MM-DD, leave empty to keep current): ");
-            string startDateInput = Console.ReadLine();
-            DateTime? startDate = string.IsNullOrEmpty(startDateInput) ? (DateTime?)null : DateTime.Parse(startDateInput);
-            Console.Write("Enter new end date (YYYY-MM-DD, leave empty to keep current): ");
-            string endDateInput = Console.ReadLine();
-            DateTime? endDate = string.IsNullOrEmpty(endDateInput) ? (DateTime?)null : DateTime.Parse(endDateInput);
+            Console.Write("Enter existing product ID: ");
+            var productId = int.Parse(Console.ReadLine());
+            Console.Write("Enter new product name: ");
+            var newProductName = Console.ReadLine();
+            Console.Write("Enter new country: ");
+            var newCountry = Console.ReadLine();
+            Console.Write("Enter new start date (YYYY-MM-DD): ");
+            var newStartDate = DateTime.Parse(Console.ReadLine());
+            Console.Write("Enter new end date (YYYY-MM-DD): ");
+            var newEndDate = DateTime.Parse(Console.ReadLine());
 
-            string sql = "UPDATE Promotions SET SectionId = COALESCE(@SectionId, SectionId), ProductName = COALESCE(NULLIF(@ProductName, ''), ProductName), Country = COALESCE(NULLIF(@Country, ''), Country), StartDate = COALESCE(@StartDate, StartDate), EndDate = COALESCE(@EndDate, EndDate) WHERE PromotionId = @PromotionId";
-            db.Execute(sql, new { PromotionId = promotionId, SectionId = sectionId, ProductName = productName, Country = country, StartDate = startDate, EndDate = endDate });
+            var sql = "UPDATE Promotions SET ProductName = @NewProductName, Country = @NewCountry, StartDate = @NewStartDate, EndDate = @NewEndDate WHERE PromotionId = @ProductId";
+            db.Execute(sql, new { NewProductName = newProductName, NewCountry = newCountry, NewStartDate = newStartDate, NewEndDate = newEndDate, ProductId = productId });
             Console.WriteLine("Promotional product information updated successfully.");
         }
 
         private static void DeleteBuyerInformation(IDbConnection db)
         {
-            Console.Write("Enter buyer id to delete: ");
-            int buyerId = int.Parse(Console.ReadLine());
-
-            string sql = "DELETE FROM Buyers WHERE BuyerId = @BuyerId";
+            Console.Write("Enter buyer ID to delete: ");
+            var buyerId = int.Parse(Console.ReadLine());
+            var sql = "DELETE FROM Buyers WHERE BuyerId = @BuyerId";
             db.Execute(sql, new { BuyerId = buyerId });
-            Console.WriteLine("Buyer deleted successfully.");
+            Console.WriteLine("Buyer information deleted successfully.");
         }
 
         private static void DeleteCountryInformation(IDbConnection db)
         {
-            Console.Write("Enter country id to delete: ");
-            int countryId = int.Parse(Console.ReadLine());
+            Console.Write("Enter country name to delete: ");
+            var country = Console.ReadLine();
 
-            string sql = "DELETE FROM Countries WHERE CountryId = @CountryId";
-            db.Execute(sql, new { CountryId = countryId });
-            Console.WriteLine("Country deleted successfully.");
+            var sql = "DELETE FROM Countries WHERE Name = @Country";
+            db.Execute(sql, new { Country = country });
+            Console.WriteLine("Country information deleted successfully.");
         }
 
         private static void DeleteCityInformation(IDbConnection db)
         {
-            Console.Write("Enter city id to delete: ");
-            int cityId = int.Parse(Console.ReadLine());
+            Console.Write("Enter city name to delete: ");
+            var city = Console.ReadLine();
 
-            string sql = "DELETE FROM Cities WHERE CityId = @CityId";
-            db.Execute(sql, new { CityId = cityId });
-            Console.WriteLine("City deleted successfully.");
+            var sql = "DELETE FROM Cities WHERE Name = @City";
+            db.Execute(sql, new { City = city });
+            Console.WriteLine("City information deleted successfully.");
         }
 
         private static void DeleteSectionInformation(IDbConnection db)
         {
-            Console.Write("Enter section id to delete: ");
-            int sectionId = int.Parse(Console.ReadLine());
+            Console.Write("Enter section name to delete: ");
+            var section = Console.ReadLine();
 
-            string sql = "DELETE FROM Interests WHERE InterestId = @SectionId";
-            db.Execute(sql, new { SectionId = sectionId });
-            Console.WriteLine("Section deleted successfully.");
+            var sql = "DELETE FROM Interests WHERE SectionName = @Section";
+            db.Execute(sql, new { Section = section });
+            Console.WriteLine("Section information deleted successfully.");
         }
 
         private static void DeletePromotionalProductInformation(IDbConnection db)
         {
-            Console.Write("Enter promotion id to delete: ");
-            int promotionId = int.Parse(Console.ReadLine());
+            Console.Write("Enter promotional product ID to delete: ");
+            var productId = int.Parse(Console.ReadLine());
 
-            string sql = "DELETE FROM Promotions WHERE PromotionId = @PromotionId";
-            db.Execute(sql, new { PromotionId = promotionId });
-            Console.WriteLine("Promotional product deleted successfully.");
+            var sql = "DELETE FROM Promotions WHERE PromotionId = @ProductId";
+            db.Execute(sql, new { ProductId = productId });
+            Console.WriteLine("Promotional product information deleted successfully.");
+        }
+
+        private static void DisplayCitiesInCountry(IDbConnection db)
+        {
+            Console.Write("Enter country name: ");
+            var country = Console.ReadLine();
+
+            var cities = db.Query<string>("SELECT City FROM Buyers WHERE Country = @Country", new { Country = country }).Distinct().ToList();
+            Console.WriteLine($"\nCities in {country}:");
+            foreach (var city in cities)
+            {
+                Console.WriteLine(city);
+            }
+        }
+
+        private static void DisplaySectionsOfCustomer(IDbConnection db)
+        {
+            Console.Write("Enter buyer id: ");
+            var buyerId = int.Parse(Console.ReadLine());
+
+            var sections = db.Query<string>("SELECT DISTINCT i.SectionName FROM Interests i INNER JOIN BuyerInterests bi ON i.InterestId = bi.InterestId WHERE bi.BuyerId = @BuyerId", new { BuyerId = buyerId }).ToList();
+            Console.WriteLine($"\nSections of customer {buyerId}:");
+            foreach (var section in sections)
+            {
+                Console.WriteLine(section);
+            }
+        }
+
+        private static void DisplayPromotionalProductsInSection(IDbConnection db)
+        {
+            Console.Write("Enter section name: ");
+            var sectionName = Console.ReadLine();
+
+            var products = db.Query<Promotion>("SELECT * FROM Promotions WHERE SectionId = (SELECT InterestId FROM Interests WHERE SectionName = @SectionName)", new { SectionName = sectionName }).ToList();
+            Console.WriteLine($"\nPromotional products in section {sectionName}:");
+            foreach (var product in products)
+            {
+                Console.WriteLine($"{product.PromotionId}: {product.ProductName} - {product.Country} ({product.StartDate} to {product.EndDate})");
+            }
         }
 
         public class Buyer
