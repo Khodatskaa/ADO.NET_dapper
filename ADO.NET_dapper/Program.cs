@@ -51,6 +51,11 @@ namespace ADO.NET_dapper
                 Console.WriteLine("17. Update city information");
                 Console.WriteLine("18. Update section information");
                 Console.WriteLine("19. Update information about promotional products");
+                Console.WriteLine("20. Delete buyer information");
+                Console.WriteLine("21. Delete country information");
+                Console.WriteLine("22. Delete city information");
+                Console.WriteLine("23. Delete section information");
+                Console.WriteLine("24. Delete promotional product information");
                 Console.WriteLine("0. Exit");
                 Console.Write("Select an option: ");
 
@@ -114,6 +119,21 @@ namespace ADO.NET_dapper
                         break;
                     case "19":
                         UpdatePromotionalProductInformation(db);
+                        break;
+                    case "20":
+                        DeleteBuyerInformation(db);
+                        break;
+                    case "21":
+                        DeleteCountryInformation(db);
+                        break;
+                    case "22":
+                        DeleteCityInformation(db);
+                        break;
+                    case "23":
+                        DeleteSectionInformation(db);
+                        break;
+                    case "24":
+                        DeletePromotionalProductInformation(db);
                         break;
                     case "0":
                         return;
@@ -245,6 +265,7 @@ namespace ADO.NET_dapper
             Console.Write("Enter country name: ");
             string country = Console.ReadLine();
 
+            // Assuming you have a Countries table
             string sql = "INSERT INTO Countries (Name) VALUES (@Country)";
             db.Execute(sql, new { Country = country });
             Console.WriteLine("Country inserted successfully.");
@@ -255,6 +276,7 @@ namespace ADO.NET_dapper
             Console.Write("Enter city name: ");
             string city = Console.ReadLine();
 
+            // Assuming you have a Cities table
             string sql = "INSERT INTO Cities (Name) VALUES (@City)";
             db.Execute(sql, new { City = city });
             Console.WriteLine("City inserted successfully.");
@@ -368,6 +390,56 @@ namespace ADO.NET_dapper
             string sql = "UPDATE Promotions SET SectionId = COALESCE(@SectionId, SectionId), ProductName = COALESCE(NULLIF(@ProductName, ''), ProductName), Country = COALESCE(NULLIF(@Country, ''), Country), StartDate = COALESCE(@StartDate, StartDate), EndDate = COALESCE(@EndDate, EndDate) WHERE PromotionId = @PromotionId";
             db.Execute(sql, new { PromotionId = promotionId, SectionId = sectionId, ProductName = productName, Country = country, StartDate = startDate, EndDate = endDate });
             Console.WriteLine("Promotional product information updated successfully.");
+        }
+
+        private static void DeleteBuyerInformation(IDbConnection db)
+        {
+            Console.Write("Enter buyer id to delete: ");
+            int buyerId = int.Parse(Console.ReadLine());
+
+            string sql = "DELETE FROM Buyers WHERE BuyerId = @BuyerId";
+            db.Execute(sql, new { BuyerId = buyerId });
+            Console.WriteLine("Buyer deleted successfully.");
+        }
+
+        private static void DeleteCountryInformation(IDbConnection db)
+        {
+            Console.Write("Enter country id to delete: ");
+            int countryId = int.Parse(Console.ReadLine());
+
+            string sql = "DELETE FROM Countries WHERE CountryId = @CountryId";
+            db.Execute(sql, new { CountryId = countryId });
+            Console.WriteLine("Country deleted successfully.");
+        }
+
+        private static void DeleteCityInformation(IDbConnection db)
+        {
+            Console.Write("Enter city id to delete: ");
+            int cityId = int.Parse(Console.ReadLine());
+
+            string sql = "DELETE FROM Cities WHERE CityId = @CityId";
+            db.Execute(sql, new { CityId = cityId });
+            Console.WriteLine("City deleted successfully.");
+        }
+
+        private static void DeleteSectionInformation(IDbConnection db)
+        {
+            Console.Write("Enter section id to delete: ");
+            int sectionId = int.Parse(Console.ReadLine());
+
+            string sql = "DELETE FROM Interests WHERE InterestId = @SectionId";
+            db.Execute(sql, new { SectionId = sectionId });
+            Console.WriteLine("Section deleted successfully.");
+        }
+
+        private static void DeletePromotionalProductInformation(IDbConnection db)
+        {
+            Console.Write("Enter promotion id to delete: ");
+            int promotionId = int.Parse(Console.ReadLine());
+
+            string sql = "DELETE FROM Promotions WHERE PromotionId = @PromotionId";
+            db.Execute(sql, new { PromotionId = promotionId });
+            Console.WriteLine("Promotional product deleted successfully.");
         }
 
         public class Buyer
