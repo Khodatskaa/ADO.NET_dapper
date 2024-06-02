@@ -46,6 +46,11 @@ namespace ADO.NET_dapper
                 Console.WriteLine("12. Insert new cities");
                 Console.WriteLine("13. Insert information about new sections");
                 Console.WriteLine("14. Insert information about new promotional products");
+                Console.WriteLine("15. Update customer information");
+                Console.WriteLine("16. Update country information");
+                Console.WriteLine("17. Update city information");
+                Console.WriteLine("18. Update section information");
+                Console.WriteLine("19. Update information about promotional products");
                 Console.WriteLine("0. Exit");
                 Console.Write("Select an option: ");
 
@@ -94,6 +99,21 @@ namespace ADO.NET_dapper
                         break;
                     case "14":
                         InsertNewPromotionalProduct(db);
+                        break;
+                    case "15":
+                        UpdateCustomerInformation(db);
+                        break;
+                    case "16":
+                        UpdateCountryInformation(db);
+                        break;
+                    case "17":
+                        UpdateCityInformation(db);
+                        break;
+                    case "18":
+                        UpdateSectionInformation(db);
+                        break;
+                    case "19":
+                        UpdatePromotionalProductInformation(db);
                         break;
                     case "0":
                         return;
@@ -266,6 +286,88 @@ namespace ADO.NET_dapper
             string sql = "INSERT INTO Promotions (SectionId, ProductName, Country, StartDate, EndDate) VALUES (@SectionId, @ProductName, @Country, @StartDate, @EndDate)";
             db.Execute(sql, new { SectionId = sectionId, ProductName = productName, Country = country, StartDate = startDate, EndDate = endDate });
             Console.WriteLine("Promotional product inserted successfully.");
+        }
+
+        private static void UpdateCustomerInformation(IDbConnection db)
+        {
+            Console.Write("Enter buyer id: ");
+            int buyerId = int.Parse(Console.ReadLine());
+            Console.Write("Enter new name (leave empty to keep current): ");
+            string name = Console.ReadLine();
+            Console.Write("Enter new date of birth (YYYY-MM-DD, leave empty to keep current): ");
+            string dobInput = Console.ReadLine();
+            DateTime? dob = string.IsNullOrEmpty(dobInput) ? (DateTime?)null : DateTime.Parse(dobInput);
+            Console.Write("Enter new gender (leave empty to keep current): ");
+            string gender = Console.ReadLine();
+            Console.Write("Enter new email (leave empty to keep current): ");
+            string email = Console.ReadLine();
+            Console.Write("Enter new country (leave empty to keep current): ");
+            string country = Console.ReadLine();
+            Console.Write("Enter new city (leave empty to keep current): ");
+            string city = Console.ReadLine();
+
+            string sql = "UPDATE Buyers SET Name = COALESCE(NULLIF(@Name, ''), Name), Dob = COALESCE(@Dob, Dob), Gender = COALESCE(NULLIF(@Gender, ''), Gender), Email = COALESCE(NULLIF(@Email, ''), Email), Country = COALESCE(NULLIF(@Country, ''), Country), City = COALESCE(NULLIF(@City, ''), City) WHERE BuyerId = @BuyerId";
+            db.Execute(sql, new { BuyerId = buyerId, Name = name, Dob = dob, Gender = gender, Email = email, Country = country, City = city });
+            Console.WriteLine("Customer information updated successfully.");
+        }
+
+        private static void UpdateCountryInformation(IDbConnection db)
+        {
+            Console.Write("Enter country id: ");
+            int countryId = int.Parse(Console.ReadLine());
+            Console.Write("Enter new country name (leave empty to keep current): ");
+            string country = Console.ReadLine();
+
+            string sql = "UPDATE Countries SET Name = COALESCE(NULLIF(@Country, ''), Name) WHERE CountryId = @CountryId";
+            db.Execute(sql, new { CountryId = countryId, Country = country });
+            Console.WriteLine("Country information updated successfully.");
+        }
+
+        private static void UpdateCityInformation(IDbConnection db)
+        {
+            Console.Write("Enter city id: ");
+            int cityId = int.Parse(Console.ReadLine());
+            Console.Write("Enter new city name (leave empty to keep current): ");
+            string city = Console.ReadLine();
+
+            string sql = "UPDATE Cities SET Name = COALESCE(NULLIF(@City, ''), Name) WHERE CityId = @CityId";
+            db.Execute(sql, new { CityId = cityId, City = city });
+            Console.WriteLine("City information updated successfully.");
+        }
+
+        private static void UpdateSectionInformation(IDbConnection db)
+        {
+            Console.Write("Enter section id: ");
+            int sectionId = int.Parse(Console.ReadLine());
+            Console.Write("Enter new section name (leave empty to keep current): ");
+            string sectionName = Console.ReadLine();
+
+            string sql = "UPDATE Interests SET SectionName = COALESCE(NULLIF(@SectionName, ''), SectionName) WHERE InterestId = @SectionId";
+            db.Execute(sql, new { SectionId = sectionId, SectionName = sectionName });
+            Console.WriteLine("Section information updated successfully.");
+        }
+
+        private static void UpdatePromotionalProductInformation(IDbConnection db)
+        {
+            Console.Write("Enter promotion id: ");
+            int promotionId = int.Parse(Console.ReadLine());
+            Console.Write("Enter new section id (leave empty to keep current): ");
+            string sectionIdInput = Console.ReadLine();
+            int? sectionId = string.IsNullOrEmpty(sectionIdInput) ? (int?)null : int.Parse(sectionIdInput);
+            Console.Write("Enter new product name (leave empty to keep current): ");
+            string productName = Console.ReadLine();
+            Console.Write("Enter new country (leave empty to keep current): ");
+            string country = Console.ReadLine();
+            Console.Write("Enter new start date (YYYY-MM-DD, leave empty to keep current): ");
+            string startDateInput = Console.ReadLine();
+            DateTime? startDate = string.IsNullOrEmpty(startDateInput) ? (DateTime?)null : DateTime.Parse(startDateInput);
+            Console.Write("Enter new end date (YYYY-MM-DD, leave empty to keep current): ");
+            string endDateInput = Console.ReadLine();
+            DateTime? endDate = string.IsNullOrEmpty(endDateInput) ? (DateTime?)null : DateTime.Parse(endDateInput);
+
+            string sql = "UPDATE Promotions SET SectionId = COALESCE(@SectionId, SectionId), ProductName = COALESCE(NULLIF(@ProductName, ''), ProductName), Country = COALESCE(NULLIF(@Country, ''), Country), StartDate = COALESCE(@StartDate, StartDate), EndDate = COALESCE(@EndDate, EndDate) WHERE PromotionId = @PromotionId";
+            db.Execute(sql, new { PromotionId = promotionId, SectionId = sectionId, ProductName = productName, Country = country, StartDate = startDate, EndDate = endDate });
+            Console.WriteLine("Promotional product information updated successfully.");
         }
 
         public class Buyer
